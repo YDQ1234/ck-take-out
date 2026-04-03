@@ -21,6 +21,25 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <!--阿里云SMS服务-->
+        <!-- 阿里云号码认证服务（短信认证核心） -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>dypnsapi20170525</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <!-- 阿里云凭据管理（安全存储AK/SK） -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>credentials-java</artifactId>
+            <version>1.0.3</version> <!-- 最新稳定版 -->
+        </dependency>
+        <!-- 阿里云基础工具依赖（credentials内部依赖） -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea</artifactId>
+            <version>1.2.0</version>
+        </dependency>
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>

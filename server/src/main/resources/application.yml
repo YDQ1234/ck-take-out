@@ -61,7 +61,16 @@ hanye:
 aliyun:
   oss:
     endpoint: oss-cn-beijing.aliyuncs.com  # 根据你的 OSS 区域修改
-    access-key-id: ''
-    access-key-secret: ''
+    access-key-id: ""
+    access-key-secret: ""
     bucket-name: sky-take-out-zxzxccxz
     region: cn-beijing  # 根据你的 OSS 区域修改（如：cn-hangzhou, cn-shanghai 等）
+  sms:
+    accessKeyId: ""
+    accessKeySecret: ""
+    signName: 云渚科技验证平台
+    templateCode: 100001
+    codeExpireMinutes: 5
+    endpoint: dypnsapi.aliyuncs.com
+    connectTimeout: 3000
+    readTimeout: 3000
