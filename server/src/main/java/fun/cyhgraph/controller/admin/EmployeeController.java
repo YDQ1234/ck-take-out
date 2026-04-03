@@ -12,6 +12,7 @@ import fun.cyhgraph.service.EmployeeService;
 import fun.cyhgraph.utils.JwtUtil;
 import fun.cyhgraph.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,30 @@ public class EmployeeController {
     @Autowired
     private JwtProperties jwtProperties;
 
+    // 新增：发送短信验证码
+    @PostMapping("/sendCode")
+    public Result<String> sendMsg(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
+        return employeeService.sendMsg(employeeLoginDTO);
+    }
+
+    // 新增：手机号+验证码登录
+    @PostMapping("/loginByPhone")
+    public Result<EmployeeLoginVO> loginByPhone(@RequestBody EmployeeLoginDTO dto) {
+        Employee employee = employeeService.loginByPhone(dto);
+        Map<String, Object> claims = new HashMap<>(); // jsonwebtoken包底层就是Map<String, Object>格式，不能修改！
+        claims.put("employeeId", employee.getId());
+        // 需要加个token给他，再返回响应
+        String token = JwtUtil.createJWT(
+                jwtProperties.getEmployeeSecretKey(),
+                jwtProperties.getEmployeeTtl(),
+                claims);
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
+                .id(employee.getId())
+                .account(employee.getAccount())
+                .token(token)
+                .build();
+        return Result.success(employeeLoginVO);
+    }
     /**
      * 员工登录
      * @param employeeLoginDTO

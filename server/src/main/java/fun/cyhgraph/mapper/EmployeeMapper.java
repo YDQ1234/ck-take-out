@@ -44,4 +44,7 @@ public interface EmployeeMapper {
 
     @AutoFill(value = OperationType.UPDATE)
     void updatePwd(Employee employee);
+
+    @Select("select * from employee where phone = #{phone}")
+    Employee getByPhone(String phone);
 }

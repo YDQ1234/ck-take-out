@@ -14,17 +14,28 @@ import fun.cyhgraph.exception.PasswordErrorException;
 import fun.cyhgraph.exception.EmployeeNotFoundException;
 import fun.cyhgraph.mapper.EmployeeMapper;
 import fun.cyhgraph.result.PageResult;
+import fun.cyhgraph.result.Result;
 import fun.cyhgraph.service.EmployeeService;
+import fun.cyhgraph.service.sms.SMSUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    SMSUtils smsUtils;
 
     /**
      * 员工登录
@@ -157,5 +168,53 @@ public class EmployeeServiceImpl implements EmployeeService {
         String password = DigestUtils.md5DigestAsHex(newPwd.getBytes());
         employee.setPassword(password);
         employeeMapper.updatePwd(employee);
+    }
+
+    @Override
+    public Result<String> sendMsg(EmployeeLoginDTO employeeLoginDTO) {
+        String phone = employeeLoginDTO.getPhone();
+        if(StringUtils.isNotEmpty(phone)) {
+            // 生成随机4位验证码
+            String code = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
+            // 发送短信
+            try {
+                smsUtils.sendMessage(phone, code);
+                // 验证码存入redis，有效期5分钟
+                redisTemplate.opsForValue().set("login:sms:" + phone, code, 5, TimeUnit.MINUTES);
+                return Result.success("验证码发送成功");
+            } catch (Exception e) {
+                throw new LoginFailedException("短信发送失败");
+            }
+        }else {
+            throw new LoginFailedException("手机号为空");
+        }
+
+    }
+
+    @Override
+    public Employee loginByPhone(EmployeeLoginDTO dto) {
+        String phone = dto.getPhone();
+        String code = dto.getCode();
+        if (!StringUtils.isNotEmpty(phone)){
+            throw new LoginFailedException("输入的手机号不能为空！");
+        }
+        if (!StringUtils.isNotEmpty(code)){
+            throw new LoginFailedException("输入的验证码不能为空！");
+        }
+        String correct = redisTemplate.opsForValue().get("login:sms:" + phone);
+        if (code.equals(correct)) {
+            Employee employee = employeeMapper.getByPhone(phone);
+            if (employee == null) {
+                employee = new Employee();
+                employee.setPhone(phone);
+                employee.setStatus(1);
+                employeeMapper.regEmployee(employee);
+            }
+            redisTemplate.delete("login:sms:" + phone);
+            return employee;
+        }else {
+            throw new LoginFailedException("输入的验证码错误！");
+        }
+
     }
 }

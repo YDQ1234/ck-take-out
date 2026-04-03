@@ -17,13 +17,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(AliyunSMSProperties.class) // 启用配置属性
 public class AliyunSMSConfiguration {
-    private static final String ACCESS_KEY_ID = "LTAI5tHLkx2U49rmrJFxGXNj";
-    private static final String ACCESS_KEY_SECRET = "mHtxksZKHiXTDI7vP6y9UbkNZA7epj";
-
-   /* @Value("${aliyun.sms.accessKeyId}")
-    private String accessKeyId;
-    @Value("${aliyun.sms.accessKeySecret}")
-    private String accessKeySecret;*/
 
     @Resource
     private AliyunSMSProperties smsProperties;
