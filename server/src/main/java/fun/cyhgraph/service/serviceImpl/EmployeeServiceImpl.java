@@ -202,6 +202,9 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new LoginFailedException("输入的验证码不能为空！");
         }
         String correct = redisTemplate.opsForValue().get("login:sms:" + phone);
+        if (StringUtils.isEmpty(correct)){
+            throw new LoginFailedException("验证码已过期！");
+        }
         if (code.equals(correct)) {
             Employee employee = employeeMapper.getByPhone(phone);
             if (employee == null) {
