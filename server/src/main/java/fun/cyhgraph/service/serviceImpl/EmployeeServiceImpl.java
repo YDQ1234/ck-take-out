@@ -136,6 +136,11 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeeDTO
      */
     public void addEmployee(EmployeeDTO employeeDTO) {
+        //手机号校验
+        Employee employ = employeeMapper.getByPhone(employeeDTO.getPhone());
+        if (employ != null){
+            throw new LoginFailedException("手机号已存在！");
+        }
         // 先对用户的密码进行MD5加密，再存到数据库中
         String password = employeeDTO.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
